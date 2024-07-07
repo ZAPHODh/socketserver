@@ -1,27 +1,28 @@
-// Import necessary modules
-import { createServer } from 'http'
 import { Server } from 'socket.io'
+import http from 'node:http'
+import express from 'express'
+const app = express()
+const port = process.env.PORT || 4000 // Use environment variable for flexibility
 
-const httpServer = createServer()
+// Assuming you have your frontend files in a directory named 'public'
+app.use(express.static('public'))
 
-const io = new Server(httpServer, {
+const server = http.createServer(app)
+const io = new Server(server, {
     cors: {
-        origin: '*',
-        methods: ['GET', 'POST'],
+        origin: '*', // Replace with allowed origins for production
     },
 })
 
 io.on('connection', (socket) => {
-    socket.on('message', (msg: string) => {
-        io.emit('messageResponse', msg)
+    socket.on('message', (msg) => {
+        console.log('Received message:', msg)
+        io.emit('messageResponse', msg) // Broadcast message to all connected clients
     })
 
-    socket.on('disconnect', () => {
-        console.log('user disconnected')
-    })
+    socket.on('disconnect', () => {})
 })
 
-const PORT = process.env.PORT || 4000
-httpServer.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
+server.listen(port, () => {
+    console.log(`Server listening on port ${port}`)
 })
