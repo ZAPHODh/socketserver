@@ -17,11 +17,15 @@ const io = new socket_io_1.Server(server, {
     },
 });
 io.on('connection', (socket) => {
-    socket.on('message', (msg) => {
-        console.log('Received message:', msg);
-        io.emit('messageResponse', msg); // Broadcast message to all connected clients
+    socket.on('join', (room) => {
+        socket.join(room);
     });
-    socket.on('disconnect', () => { });
+    socket.on('message', (msg) => {
+        io.to(msg.room).emit('messageResponse', msg); // Broadcast message to all connected clients
+    });
+    socket.on('leaveRoom', (room) => {
+        socket.leave(room);
+    });
 });
 server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
